@@ -87,7 +87,26 @@ export class PaymentsService {
   async confirmPayment(confirmPaymentDto: ConfirmPaymentDto, userId: string) {
     const { paymentIntentId, bookingId } = confirmPaymentDto;
 
+    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking) throw new NotFoundException('Booking not found');
+    if (booking.guestId !== userId) {
+      throw new ForbiddenException('You can only pay for your own bookings');
+    }
+    if (booking.status !== 'CONFIRMED') {
+      throw new BadRequestException('Booking must be confirmed before payment');
+    }
+    const storedPayment = await this.prisma.payment.findUnique({ where: { bookingId } });
+    if (!storedPayment || storedPayment.stripePaymentIntentId !== paymentIntentId) {
+      throw new BadRequestException('Payment intent does not match this booking');
+    }
+
     const paymentIntent = await this.stripeService.retrievePaymentIntent(paymentIntentId);
+
+    if (paymentIntent.metadata.bookingId !== bookingId ||
+        paymentIntent.amount !== Math.round(storedPayment.amount * 100) ||
+        paymentIntent.currency !== storedPayment.currency) {
+      throw new BadRequestException('Payment details do not match this booking');
+    }
 
     if (paymentIntent.status !== 'succeeded') {
       throw new BadRequestException('Payment not successful');

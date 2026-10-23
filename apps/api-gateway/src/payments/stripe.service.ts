@@ -13,6 +13,10 @@ export class StripeService {
       throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
     }
 
+    if (!apiKey.startsWith('sk_test_')) {
+      throw new Error('Eat In development only permits Stripe test keys');
+    }
+
     this.stripe = new Stripe(apiKey, {
       apiVersion: '2025-12-15.clover',
       typescript: true,

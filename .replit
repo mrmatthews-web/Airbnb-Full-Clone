@@ -1,0 +1,12 @@
+entrypoint = "apps/web/src/app/page.tsx"
+modules = ["nodejs-22"]
+run = "npx --yes pnpm@8.15.0 --filter web dev --hostname 0.0.0.0 --port 3000"
+
+[deployment]
+build = ["sh", "-c", "npx --yes pnpm@8.15.0 install --frozen-lockfile && npx --yes pnpm@8.15.0 --filter web build"]
+run = ["sh", "-c", "npx --yes pnpm@8.15.0 --filter web start --hostname 0.0.0.0 --port 3000"]
+deploymentTarget = "cloudrun"
+
+[[ports]]
+localPort = 3000
+externalPort = 80

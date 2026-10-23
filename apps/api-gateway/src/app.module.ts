@@ -16,7 +16,9 @@ import { FavoritesModule } from './favorites/favorites.module';
     AuthModule,
     PropertiesModule,
     BookingsModule,
-    PaymentsModule,
+    // The Eat In prototype never needs Stripe. Legacy test-only endpoints must
+    // be explicitly enabled for isolated backend testing.
+    ...(process.env.EAT_IN_ENABLE_LEGACY_PAYMENTS === 'true' ? [PaymentsModule] : []),
     ReviewsModule,
     FavoritesModule,
   ],

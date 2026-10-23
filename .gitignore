@@ -74,6 +74,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Misc
+audit.local.json
 .DS_Store
 *.pem
 
