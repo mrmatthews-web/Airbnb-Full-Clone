@@ -28,3 +28,11 @@ Replit configuration and private-preview instructions are included. No Replit se
 After upgrading to Next.js 16.4.1, the demo's domain tests and targeted lint checks pass again, and the frozen offline install remains reproducible. The active web dependency tree has zero production audit findings. The retained legacy API/workspace has 21 outstanding findings and is excluded from the prototype runtime/deployment.
 
 The final Next.js 16.4.1 production build, TypeScript check and protected-image HTTP checks pass. Images are deliberately served directly from the local protected assets because the image optimiser does not forward Basic authentication headers. No anonymous or wrong-password access is allowed in production. The Replit plugin was subsequently connected successfully, and an app search returned no existing Eat In app.
+
+## Sign-in compatibility repair — 25 October 2026
+
+The hosted preview's browser-level Basic authentication challenge was incompatible with the embedded browser. Added `/preview-login`, a self-contained HTML form requiring only the existing preview password. No JavaScript or public application assets are required to sign in. The actual Render password is neither read nor changed by this repair.
+
+The form creates an eight-hour HMAC-signed, nonce-bearing session cookie, marked HttpOnly, SameSite=Lax and Secure in production. Password changes invalidate sessions. Invalid/expired/tampered sessions remain blocked; requests without a configured 16-character password still fail closed. The form rejects cross-origin submissions and limits its request body. Explicit Basic-auth requests remain supported, but browser challenge popups are removed.
+
+Regression checks cover the form redirect, wrong password, same-origin enforcement, successful cookie issuance, protected page/image access, cookie flags and tampered tokens. Two additional domain tests cover expiry, password rotation and token integrity. The local default Turbopack build failed in its CSS worker on Windows; the alternative Webpack production compiler is used for local validation, while Render's normal build remains unchanged.

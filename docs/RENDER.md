@@ -10,7 +10,7 @@ The root `render.yaml` defines one Free Node web service on branch `eat-in-devel
 4. When prompted, enter a randomly generated preview password of at least 16 characters for `EAT_IN_PREVIEW_PASSWORD`. Keep it in Render's environment settings and a password manager, not in chat or Git.
 5. Apply the Blueprint and wait for the deployment logs. The app listens on Render's assigned port and all network interfaces.
 6. Keep Render's default **TCP health check**. Do not use `/` as an HTTP health check: the preview gate correctly returns 401 to unsigned requests.
-7. Open the URL Render supplies. Use username `eatin` and your preview password. A missing or short password produces 503; absent or incorrect credentials produce 401.
+7. Open the URL Render supplies. The normal sign-in page asks only for your preview password, with no username or browser popup. A missing or short configured password produces 503; an incorrect form submission produces 401 and a clear error. Sessions expire after eight hours. For old cached browser credentials, open `/preview-login` directly.
 8. Verify the page, photos, menu selection, demo booking, shopping list, cook workspace and two-way ratings on desktop and phone. Check in a private browser window that credentials are required.
 
 If using **New > Web Service** instead, select the same repository and branch, Node runtime, Free instance, blank root directory, and copy the build/start commands and environment settings from `render.yaml`.

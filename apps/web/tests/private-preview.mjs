@@ -51,6 +51,9 @@ async function checkServer(port, password, check) {
     }
     assert.ok(ready, `Preview server not ready: ${output}`);
     await check(`http://127.0.0.1:${port}`);
+  } catch (error) {
+    console.error(output);
+    throw error;
   } finally {
     server.kill();
   }
@@ -58,6 +61,53 @@ async function checkServer(port, password, check) {
 
 await checkServer(3100, "fixture-only-preview-password", async (base) => {
   assert.equal((await fetch(base)).status, 401);
+  const navigation = await fetch(base, {
+    headers: { Accept: "text/html" },
+    redirect: "manual",
+  });
+  assert.equal(navigation.status, 303);
+  assert.equal(new URL(navigation.headers.get("location"), base).pathname, "/preview-login");
+  const loginPage = await fetch(`${base}/preview-login`);
+  assert.equal(loginPage.status, 200);
+  assert.match(await loginPage.text(), /name="password"/);
+  const post = (password, origin = base) =>
+    fetch(`${base}/preview-login`, {
+      method: "POST",
+      headers: {
+        Origin: origin,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ password }),
+      redirect: "manual",
+    });
+  const rejected = await post("incorrect-fixture");
+  assert.equal(rejected.status, 401);
+  assert.equal(rejected.headers.get("set-cookie"), null);
+  assert.equal(
+    (await post("fixture-only-preview-password", "https://unrelated.example"))
+      .status,
+    403,
+  );
+  const signedIn = await post("fixture-only-preview-password");
+  assert.equal(signedIn.status, 303);
+  const setCookie = signedIn.headers.get("set-cookie");
+  assert.match(setCookie, /HttpOnly/i);
+  assert.match(setCookie, /Secure/i);
+  assert.match(setCookie, /SameSite=lax/i);
+  const cookie = setCookie.split(";")[0];
+  assert.equal(
+    (await fetch(base, { headers: { Cookie: cookie } })).status,
+    200,
+  );
+  assert.equal(
+    (await fetch(`${base}/images/italian.jpg`, { headers: { Cookie: cookie } }))
+      .status,
+    200,
+  );
+  assert.equal(
+    (await fetch(base, { headers: { Cookie: cookie + "corrupt" } })).status,
+    401,
+  );
   const wrong = {
     Authorization: `Basic ${Buffer.from("eatin:wrong").toString("base64")}`,
   };
@@ -76,7 +126,7 @@ await checkServer(3100, "fixture-only-preview-password", async (base) => {
     200,
   );
   console.log(
-    "PASS: production preview rejects anonymous/wrong credentials and serves the page/assets with valid credentials",
+    "PASS: form login, cookie protection, CSRF rejection and legacy Basic access all work",
   );
 });
 await checkServer(3101, undefined, async (base) => {

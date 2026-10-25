@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:demo": "node --experimental-strip-types --test tests/eat-in.test.mjs"
+    "test:demo": "node --experimental-strip-types --test tests/eat-in.test.mjs tests/preview-auth.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
