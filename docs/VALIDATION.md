@@ -36,3 +36,8 @@ The hosted preview's browser-level Basic authentication challenge was incompatib
 The form creates an eight-hour HMAC-signed, nonce-bearing session cookie, marked HttpOnly, SameSite=Lax and Secure in production. Password changes invalidate sessions. Invalid/expired/tampered sessions remain blocked; requests without a configured 16-character password still fail closed. The form rejects cross-origin submissions and limits its request body. Explicit Basic-auth requests remain supported, but browser challenge popups are removed.
 
 Regression checks cover the form redirect, wrong password, same-origin enforcement, successful cookie issuance, protected page/image access, cookie flags and tampered tokens. Two additional domain tests cover expiry, password rotation and token integrity. The local default Turbopack build failed in its CSS worker on Windows; the alternative Webpack production compiler is used for local validation, while Render's normal build remains unchanged.
+
+## Browser form origin repair — 25 October 2026
+
+Reproduced the live form returning 403 before password validation. The login page's no-referrer policy made browser form submissions send an opaque Origin. Changed the policy to same-origin, retaining strict Origin validation. The corrected production build passed a real browser form submission using a synthetic local password and reached the protected home page. HTTP regression checks cover the policy, opaque/cross-site origin rejection, valid login and protected assets. No Render password was read or changed.
+

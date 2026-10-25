@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 const headers = {
   "Cache-Control": "no-store",
   "X-Robots-Tag": "noindex, nofollow",
-  "Referrer-Policy": "no-referrer",
+  // Preserve Origin on same-site form POSTs for the CSRF check below.
+  "Referrer-Policy": "same-origin",
   "X-Content-Type-Options": "nosniff",
   "Content-Security-Policy":
     "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",

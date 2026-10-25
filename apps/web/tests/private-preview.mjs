@@ -69,6 +69,7 @@ await checkServer(3100, "fixture-only-preview-password", async (base) => {
   assert.equal(new URL(navigation.headers.get("location"), base).pathname, "/preview-login");
   const loginPage = await fetch(`${base}/preview-login`);
   assert.equal(loginPage.status, 200);
+  assert.equal(loginPage.headers.get("referrer-policy"), "same-origin");
   assert.match(await loginPage.text(), /name="password"/);
   const post = (password, origin = base) =>
     fetch(`${base}/preview-login`, {
@@ -83,6 +84,7 @@ await checkServer(3100, "fixture-only-preview-password", async (base) => {
   const rejected = await post("incorrect-fixture");
   assert.equal(rejected.status, 401);
   assert.equal(rejected.headers.get("set-cookie"), null);
+  assert.equal((await post("fixture-only-preview-password", "null")).status, 403);
   assert.equal(
     (await post("fixture-only-preview-password", "https://unrelated.example"))
       .status,
