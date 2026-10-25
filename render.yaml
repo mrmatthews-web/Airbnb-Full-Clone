@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: eat-in-testing
+    runtime: node
+    plan: free
+    repo: https://github.com/mrmatthews-web/Airbnb-Full-Clone
+    branch: eat-in-development
+    buildCommand: npx --yes pnpm@8.15.0 install --frozen-lockfile && npx --yes pnpm@8.15.0 --filter web build
+    startCommand: npx --yes pnpm@8.15.0 --filter web start --hostname 0.0.0.0 --port $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: EAT_IN_PREVIEW_PASSWORD
+        sync: false
